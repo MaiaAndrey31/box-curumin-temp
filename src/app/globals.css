@@ -1,26 +1,116 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Oswald:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================
+   BOX CURUMIM GYM — DESIGN TOKENS
+   Paleta provisória esportiva premium
+   Substituir pela identidade oficial quando disponível
+   ============================================ */
+
+@theme {
+  /* Cores */
+  --color-black: #0B0B0D;
+  --color-graphite: #27272A;
+  --color-white: #F4F4F2;
+  --color-orange: #F36B21;
+  --color-orange-hover: #D95A15;
+  --color-gray-light: #A1A1AA;
+  --color-gray-dark: #3F3F46;
+
+  /* Tipografia */
+  --font-display: "Oswald", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* Espaçamento estendido */
+  --spacing-18: 4.5rem;
+  --spacing-22: 5.5rem;
+  --spacing-30: 7.5rem;
+
+  /* Animações */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ============================================
+   BASE STYLES
+   ============================================ */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
+
+/* Tipografia Display — títulos expressivos */
+.font-display {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-style: italic;
+  letter-spacing: -0.02em;
+}
+
+/* Seleção de texto */
+::selection {
+  background-color: var(--color-orange);
+  color: var(--color-black);
+}
+
+/* Scrollbar customizada */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-graphite);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-orange);
+}
+
+/* ============================================
+   UTILITÁRIOS DE ANIMAÇÃO (CSS nativo)
+   Para microinterações e estados simples
+   GSAP é usado para animações complexas/scrub
+   ============================================ */
+
+/* Hover em botões e cards */
+.hover-lift {
+  transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(243, 107, 33, 0.15);
+}
+
+/* Foco acessível */
+.focus-visible-ring:focus-visible {
+  outline: 2px solid var(--color-orange);
+  outline-offset: 4px;
+}
+
+/* Reduced motion global */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
