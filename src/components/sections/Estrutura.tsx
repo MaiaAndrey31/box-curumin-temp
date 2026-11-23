@@ -8,339 +8,1027 @@ import Image from "next/image";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// ============================================
-// CONFIGURAÇÃO CENTRALIZADA DA ANIMAÇÃO
-// Ajuste estes valores para controlar o ritmo da experiência
-// ============================================
 const ANIMATION_CONFIG = {
- // Duração relativa da transição entre cards (entrada do próximo)
- transitionDuration: 1,
- // Duração relativa do período de permanência (hold) após cada transição
- holdDuration: 1.5,
- // Intensidade do scrub (suavização): valores maiores = mais suave/lento
- scrub: 1,
- // Distância de scroll por card no mobile (em vh)
- mobileScrollPerCard: 80,
+  transitionDuration: 0.4,
+  holdDuration: 0.3,
+  scrub: 0.7,
+  mobileScrollPerCard: 70,
 };
 
-// 4 cards centralizados para fácil substituição futura de imagens
 const CARDS = [
- { src: "/assets/Fachada.png", alt: "Fachada do Box Curumim Gym" },
- { src: "/assets/bannerHome.png", alt: "Ambiente interno de treinamento" },
- { src: "/assets/SecondaryBanner.png", alt: "Espaço dedicado ao movimento" },
- { src: "/assets/Fachada.png", alt: "Estrutura completa e equipada" },
+  {
+    number: "01",
+    src: "/assets/Fachada.png",
+    alt: "Fachada do Box Curumim Gym",
+    eyebrow: "NOSSO ESPAÇO",
+    title: "UM ESPAÇO QUE",
+    highlight: "IMPULSIONA",
+    description:
+      "Um ambiente pensado para performance, segurança e conforto, onde cada detalhe contribui para uma experiência de treino completa.",
+  },
+  {
+    number: "02",
+    src: "/assets/bannerHome.png",
+    alt: "Ambiente interno de treinamento",
+    eyebrow: "ÁREA DE TREINAMENTO",
+    title: "ESTRUTURA PARA",
+    highlight: "EVOLUIR",
+    description:
+      "Espaços amplos e preparados para diferentes estímulos, proporcionando liberdade de movimento e uma experiência de treino dinâmica.",
+  },
+  {
+    number: "03",
+    src: "/assets/SecondaryBanner.png",
+    alt: "Espaço dedicado ao movimento",
+    eyebrow: "MOVIMENTO",
+    title: "TREINO COM",
+    highlight: "PROPÓSITO",
+    description:
+      "Um ambiente que favorece movimento, condicionamento e evolução, com uma atmosfera que mantém você motivado a ir além.",
+  },
+  {
+    number: "04",
+    src: "/assets/Fachada.png",
+    alt: "Estrutura completa e equipada",
+    eyebrow: "BOX CURUMIM",
+    title: "TUDO NO MESMO",
+    highlight: "LUGAR",
+    description:
+      "Uma estrutura completa para acompanhar diferentes objetivos e momentos da sua jornada, do primeiro treino à evolução constante.",
+  },
 ];
 
 export function Estrutura() {
- const sectionRef = useRef<HTMLElement>(null);
- // Refs separadas para desktop e mobile para evitar conflito de seletores
- const desktopCardsRef = useRef<HTMLDivElement[]>([]);
- const mobileCardsRef = useRef<HTMLDivElement[]>([]);
- const progressRef = useRef<HTMLDivElement>(null);
- const [activeIndex, setActiveIndex] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
 
- // Callback memoizado para evitar re-renders desnecessários no onUpdate
- const updateActiveIndex = useCallback(
- (idx: number) => {
- setActiveIndex((prev) => (prev !== idx ? idx : prev));
- },
- []
- );
+  const desktopCardsRef = useRef<HTMLDivElement[]>([]);
+  const desktopContentRef = useRef<HTMLDivElement[]>([]);
 
- useGSAP(
- () => {
- const ctx = gsap.context(() => {
- const mm = gsap.matchMedia();
+  const mobileCardsRef = useRef<HTMLDivElement[]>([]);
 
- // ============================================
- // DESKTOP (>= 1024px): Sticky + Stacked Cards + Scrub + Hold
- // ============================================
- mm.add("(min-width: 1024px)", () => {
- const totalCards = CARDS.length;
- const { transitionDuration, holdDuration, scrub } = ANIMATION_CONFIG;
+  const progressRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
- // Cada card tem um segmento completo: transição + hold
- // O primeiro card tem apenas hold inicial (já está visível)
- // O último card tem hold final após entrar
- // Total de segmentos = totalCards (1 hold inicial + N-1 transições+holds)
- const segmentDuration = transitionDuration + holdDuration;
- const totalTimelineDuration = segmentDuration * totalCards;
+  const updateActiveIndex = useCallback((index: number) => {
+    setActiveIndex((prev) => (prev !== index ? index : prev));
+  }, []);
 
- // Distância total de scroll proporcional à duração da timeline
- const scrollDistance = window.innerHeight * totalTimelineDuration;
+  useGSAP(
+    () => {
+      const ctx = gsap.context(() => {
+        const mm = gsap.matchMedia();
 
- // Set inicial via GSAP (não inline style) para garantir que
- // a timeline tenha controle total sobre transform/opacity
- desktopCardsRef.current.forEach((card, i) => {
- if (!card) return;
- gsap.set(card, {
- yPercent: i === 0 ? 0 : 100,
- opacity: i === 0 ? 1 : 0,
- scale: 1,
- zIndex: i,
- });
- });
+        // =========================================================
+        // DESKTOP
+        // =========================================================
 
- const tl = gsap.timeline({
- scrollTrigger: {
- trigger: sectionRef.current,
- start: "top top",
- end: () => `+=${scrollDistance}`,
- pin: true,
- scrub,
- invalidateOnRefresh: true,
- anticipatePin: 1,
- onUpdate: (self) => {
- // Calcula qual card está ativo baseado no progresso da timeline
- // Cada segmento representa um card: [0..1/N) = card 0, [1/N..2/N) = card 1, etc.
- const progressPerSegment = 1 / totalCards;
- const idx = Math.min(
- Math.floor(self.progress / progressPerSegment),
- totalCards - 1
- );
- updateActiveIndex(idx);
- },
- },
- });
+        mm.add("(min-width: 1024px)", () => {
+          const totalCards = CARDS.length;
 
- // --- HOLD INICIAL: Card 01 permanece visível ---
- // Segmento vazio onde nada muda visualmente, mas o scroll avança
- tl.to({}, { duration: holdDuration }, 0);
+          const {
+            transitionDuration,
+            holdDuration,
+            scrub,
+          } = ANIMATION_CONFIG;
 
- // --- TRANSIÇÕES + HOLDS para cada card subsequente ---
- for (let i = 1; i < totalCards; i++) {
- const card = desktopCardsRef.current[i];
- const prevCard = desktopCardsRef.current[i - 1];
- // Posição na timeline onde esta transição começa
- const segmentStart = i * segmentDuration;
+          const segmentDuration =
+            transitionDuration + holdDuration;
 
- if (card) {
- // Card atual entra de baixo para cima (transição)
- tl.to(
- card,
- {
- yPercent: 0,
- opacity: 1,
- duration: transitionDuration,
- ease: "none",
- },
- segmentStart
- );
- }
+          const totalTimelineDuration =
+            segmentDuration * totalCards;
 
- if (prevCard) {
- // Card anterior reduz escala e brilho durante a transição
- tl.to(
- prevCard,
- {
- scale: 0.96,
- filter: "brightness(0.7)",
- duration: transitionDuration,
- ease: "none",
- },
- segmentStart
- );
- }
+          const scrollDistance =
+            window.innerHeight * totalTimelineDuration;
 
- // HOLD após transição: card permanece visível sem mudança visual
- // Adiciona um segmento vazio após a transição completar
- tl.to({}, { duration: holdDuration }, segmentStart + transitionDuration);
- }
+          // -------------------------------------------------------
+          // ESTADO INICIAL DAS IMAGENS
+          // -------------------------------------------------------
 
- // Barra de progresso sincronizada com toda a timeline
- if (progressRef.current) {
- tl.fromTo(
- progressRef.current,
- { width: "0%" },
- { width: "100%", duration: totalTimelineDuration, ease: "none" },
- 0
- );
- }
- });
+          desktopCardsRef.current.forEach((card, index) => {
+            if (!card) return;
 
- // ============================================
- // TABLET (768px - 1023px): Vertical reveal com scrub + hold
- // ============================================
- mm.add("(min-width: 768px) and (max-width: 1023px)", () => {
- const { mobileScrollPerCard } = ANIMATION_CONFIG;
+            gsap.set(card, {
+              yPercent: index === 0 ? 0 : 12,
+              opacity: index === 0 ? 1 : 0,
+              scale: index === 0 ? 1 : 0.96,
+              filter:
+                index === 0
+                  ? "brightness(1)"
+                  : "brightness(0.5)",
+              zIndex: index + 1,
+            });
+          });
 
- mobileCardsRef.current.forEach((card, i) => {
- if (!card) return;
+          // -------------------------------------------------------
+          // ESTADO INICIAL DOS CONTEÚDOS
+          // -------------------------------------------------------
 
- // Cada card tem seu próprio ScrollTrigger independente
- // com distância de scroll que inclui transição + hold
- const scrollDist = window.innerHeight * (mobileScrollPerCard / 100);
+          desktopContentRef.current.forEach((content, index) => {
+            if (!content) return;
 
- gsap.fromTo(
- card,
- { y: 80, opacity: 0, scale: 0.97 },
- {
- y: 0,
- opacity: 1,
- scale: 1,
- ease: "none",
- scrollTrigger: {
- trigger: card,
- start: "top 85%",
- end: () => `+=${scrollDist}`,
- scrub: ANIMATION_CONFIG.scrub,
- },
- }
- );
- });
- });
+            gsap.set(content, {
+              y: index === 0 ? 0 : 35,
+              opacity: index === 0 ? 1 : 0,
+            });
+          });
 
- // ============================================
- // MOBILE (< 768px): Vertical reveal com scrub adaptado + hold
- // ============================================
- mm.add("(max-width: 767px)", () => {
- const { mobileScrollPerCard } = ANIMATION_CONFIG;
+          // -------------------------------------------------------
+          // TIMELINE PRINCIPAL
+          // -------------------------------------------------------
 
- mobileCardsRef.current.forEach((card, i) => {
- if (!card) return;
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top top",
+              end: () => `+=${scrollDistance}`,
+              pin: true,
+              scrub,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
 
- const scrollDist = window.innerHeight * (mobileScrollPerCard / 100);
+              onUpdate: (self) => {
+                const progressPerCard = 1 / totalCards;
 
- gsap.fromTo(
- card,
- { y: 50, opacity: 0 },
- {
- y: 0,
- opacity: 1,
- ease: "none",
- scrollTrigger: {
- trigger: card,
- start: "top 88%",
- end: () => `+=${scrollDist}`,
- scrub: ANIMATION_CONFIG.scrub,
- },
- }
- );
- });
- });
- }, sectionRef);
+                const index = Math.min(
+                  Math.floor(
+                    self.progress / progressPerCard
+                  ),
+                  totalCards - 1
+                );
 
- return () => ctx.revert();
- },
- { scope: sectionRef }
- );
+                updateActiveIndex(index);
+              },
+            },
+          });
 
- return (
- <section
- ref={sectionRef}
- className="relative bg-graphite overflow-hidden"
- aria-label="Estrutura"
- id="estrutura"
- >
- <div className="container mx-auto max-w-7xl px-6 md:px-12 lg:px-20">
- {/* ==============================
- DESKTOP: duas colunas
- ============================== */}
- <div className="hidden lg:grid lg:grid-cols-[40%_60%] gap-12 min-h-screen items-start">
- {/* COLUNA ESQUERDA — Sticky Content */}
- <div className="flex flex-col justify-center h-screen py-24">
- <p className="text-gray-light text-sm uppercase tracking-[0.3em] font-medium mb-4">
- Conheça nosso espaço
- </p>
+          // -------------------------------------------------------
+          // PROGRESSO
+          // -------------------------------------------------------
 
- <h2 className="font-display text-5xl xl:text-6xl font-bold italic leading-[0.95] mb-6">
- ESTRUTURA{" "}
- <span className="text-orange">COMPLETA</span>
- </h2>
+          if (progressRef.current) {
+            gsap.set(progressRef.current, {
+              scaleX: 0,
+              transformOrigin: "left center",
+            });
 
- <p className="text-gray-light text-base lg:text-lg leading-relaxed max-w-md mb-10">
- Um ambiente pensado para performance, segurança e conforto.
- Equipamentos modernos, espaços amplos e atmosfera motivadora
- para que cada treino seja um passo em direção à sua melhor versão.
- </p>
+            tl.to(
+              progressRef.current,
+              {
+                scaleX: 1,
+                duration: totalTimelineDuration,
+                ease: "none",
+              },
+              0
+            );
+          }
 
- {/* Indicador de progresso */}
- <div className="flex items-center gap-4">
- <span className="font-display font-bold italic text-orange text-2xl">
- {String(activeIndex + 1).padStart(2, "0")}
- </span>
- <div className="flex-1 h-px bg-white/10 relative overflow-hidden max-w-[120px]">
- <div
- ref={progressRef}
- className="absolute inset-y-0 left-0 bg-orange will-change-transform"
- style={{ width: "0%" }}
- />
- </div>
- <span className="font-display font-bold italic text-white/30 text-2xl">
- {String(CARDS.length).padStart(2, "0")}
- </span>
- </div>
- </div>
+          // -------------------------------------------------------
+          // HOLD INICIAL
+          // -------------------------------------------------------
 
- {/* COLUNA DIREITA — Stacked Cards */}
- <div className="relative h-screen flex items-center justify-center py-24">
- {CARDS.map((img, index) => (
- <div
- key={`desktop-${index}`}
- ref={(el) => {
- if (el) desktopCardsRef.current[index] = el;
- }}
- className="absolute w-full max-w-[580px] aspect-[4/5] rounded-2xl overflow-hidden border border-white/5 will-change-transform"
- >
- <Image
- src={img.src}
- alt={img.alt}
- fill
- className="object-cover brightness-[0.6]"
- sizes="(min-width: 1024px) 580px, 100vw"
- />
- <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
- <p className="absolute bottom-8 left-8 font-display font-bold italic text-white text-xl lg:text-2xl">
- {img.alt}
- </p>
- </div>
- ))}
- </div>
- </div>
+          tl.to(
+            {},
+            {
+              duration: holdDuration,
+            },
+            0
+          );
 
- {/* ==============================
- MOBILE / TABLET
- ============================== */}
- <div className="lg:hidden flex flex-col gap-8 py-24 md:py-32">
- <div className="mb-4">
- <p className="text-gray-light text-xs uppercase tracking-[0.3em] font-medium mb-3">
- Conheça nosso espaço
- </p>
- <h2 className="font-display text-4xl md:text-5xl font-bold italic leading-[0.95] mb-4">
- ESTRUTURA{" "}
- <span className="text-orange">COMPLETA</span>
- </h2>
- <p className="text-gray-light text-sm md:text-base leading-relaxed max-w-lg">
- Um ambiente pensado para performance, segurança e conforto.
- Equipamentos modernos, espaços amplos e atmosfera motivadora.
- </p>
- </div>
+          // -------------------------------------------------------
+          // TRANSIÇÕES
+          // -------------------------------------------------------
 
- <div className="flex flex-col gap-6">
- {CARDS.map((img, index) => (
- <div
- key={`mobile-${index}`}
- ref={(el) => {
- if (el) mobileCardsRef.current[index] = el;
- }}
- className="relative w-full aspect-[4/5] md:aspect-[3/4] rounded-2xl overflow-hidden border border-white/5"
- >
- <Image
- src={img.src}
- alt={img.alt}
- fill
- className="object-cover brightness-[0.6]"
- sizes="(max-width: 768px) 100vw, 80vw"
- />
- <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
- <p className="absolute bottom-6 left-6 font-display font-bold italic text-white text-lg md:text-xl">
- {img.alt}
- </p>
- </div>
- ))}
- </div>
- </div>
- </div>
- </section>
- );
+          for (let i = 1; i < totalCards; i++) {
+            const currentCard =
+              desktopCardsRef.current[i];
+
+            const previousCard =
+              desktopCardsRef.current[i - 1];
+
+            const currentContent =
+              desktopContentRef.current[i];
+
+            const previousContent =
+              desktopContentRef.current[i - 1];
+
+            const segmentStart =
+              i * segmentDuration;
+
+            // -----------------------------------------------
+            // IMAGEM NOVA
+            // -----------------------------------------------
+
+            if (currentCard) {
+              tl.to(
+                currentCard,
+                {
+                  yPercent: 0,
+                  opacity: 1,
+                  scale: 1,
+                  filter: "brightness(1)",
+                  duration: transitionDuration,
+                  ease: "power2.out",
+                },
+                segmentStart
+              );
+            }
+
+            // -----------------------------------------------
+            // IMAGEM ANTERIOR
+            // -----------------------------------------------
+
+            if (previousCard) {
+              tl.to(
+                previousCard,
+                {
+                  yPercent: -5,
+                  opacity: 0,
+                  scale: 0.96,
+                  filter: "brightness(0.45)",
+                  duration: transitionDuration,
+                  ease: "power2.inOut",
+                },
+                segmentStart
+              );
+            }
+
+            // -----------------------------------------------
+            // CONTEÚDO NOVO
+            // -----------------------------------------------
+
+            if (currentContent) {
+              tl.fromTo(
+                currentContent,
+                {
+                  y: 35,
+                  opacity: 0,
+                },
+                {
+                  y: 0,
+                  opacity: 1,
+                  duration: transitionDuration * 0.75,
+                  ease: "power3.out",
+                },
+                segmentStart + 0.15
+              );
+            }
+
+            // -----------------------------------------------
+            // CONTEÚDO ANTERIOR
+            // -----------------------------------------------
+
+            if (previousContent) {
+              tl.to(
+                previousContent,
+                {
+                  y: -25,
+                  opacity: 0,
+                  duration: transitionDuration * 0.55,
+                  ease: "power2.in",
+                },
+                segmentStart
+              );
+            }
+
+            // -----------------------------------------------
+            // HOLD
+            // -----------------------------------------------
+
+            tl.to(
+              {},
+              {
+                duration: holdDuration,
+              },
+              segmentStart + transitionDuration
+            );
+          }
+        });
+
+        // =========================================================
+        // TABLET
+        // =========================================================
+
+        mm.add(
+          "(min-width: 768px) and (max-width: 1023px)",
+          () => {
+            const { mobileScrollPerCard, scrub } =
+              ANIMATION_CONFIG;
+
+            mobileCardsRef.current.forEach((card) => {
+              if (!card) return;
+
+              const scrollDistance =
+                window.innerHeight *
+                (mobileScrollPerCard / 100);
+
+              gsap.fromTo(
+                card,
+                {
+                  y: 70,
+                  opacity: 0,
+                  scale: 0.97,
+                },
+                {
+                  y: 0,
+                  opacity: 1,
+                  scale: 1,
+                  ease: "none",
+
+                  scrollTrigger: {
+                    trigger: card,
+                    start: "top 85%",
+                    end: () => `+=${scrollDistance}`,
+                    scrub,
+                  },
+                }
+              );
+            });
+          }
+        );
+
+        // =========================================================
+        // MOBILE
+        // =========================================================
+
+        mm.add("(max-width: 767px)", () => {
+          const {
+            mobileScrollPerCard,
+            scrub,
+          } = ANIMATION_CONFIG;
+
+          mobileCardsRef.current.forEach((card) => {
+            if (!card) return;
+
+            const scrollDistance =
+              window.innerHeight *
+              (mobileScrollPerCard / 100);
+
+            gsap.fromTo(
+              card,
+              {
+                y: 50,
+                opacity: 0,
+                scale: 0.96,
+              },
+              {
+                y: 0,
+                opacity: 1,
+                scale: 1,
+                ease: "none",
+
+                scrollTrigger: {
+                  trigger: card,
+                  start: "top 88%",
+                  end: () => `+=${scrollDistance}`,
+                  scrub,
+                },
+              }
+            );
+          });
+        });
+      }, sectionRef);
+
+      return () => ctx.revert();
+    },
+    {
+      scope: sectionRef,
+    }
+  );
+
+  return (
+    <section
+      ref={sectionRef}
+      id="estrutura"
+      aria-label="Estrutura"
+      className="
+        relative
+        overflow-hidden
+        bg-[#0b0b0b]
+      "
+    >
+      {/* =====================================================
+          DESKTOP
+      ===================================================== */}
+
+      <div className="hidden lg:block">
+        <div className="relative h-[110vh]">
+          <div className="sticky top-0 h-screen overflow-hidden">
+
+            {/* Glow decorativo */}
+            <div
+              className="
+                pointer-events-none
+                absolute
+                -left-40
+                top-1/3
+                h-[500px]
+                w-[500px]
+                rounded-full
+                bg-orange/[0.04]
+                blur-[140px]
+              "
+            />
+
+            <div
+              className="
+                pointer-events-none
+                absolute
+                -right-40
+                bottom-0
+                h-[450px]
+                w-[450px]
+                rounded-full
+                bg-orange/[0.035]
+                blur-[150px]
+              "
+            />
+
+            <div
+              className="
+                relative
+                z-10
+                mx-auto
+                flex
+                h-full
+                max-w-[1500px]
+                flex-col
+                px-8
+                pt-22
+                pb-10
+                xl:px-14
+              "
+            >
+
+             
+              {/* =================================================
+                  CONTEÚDO PRINCIPAL
+              ================================================= */}
+
+              <div
+                className="
+                  grid
+                  flex-1
+                  grid-cols-[0.8fr_1.2fr]
+                  items-center
+                  gap-14
+                "
+              >
+
+                {/* =============================================
+                    TEXTO
+                ============================================= */}
+
+                <div className="relative h-[390px]">
+
+                  {CARDS.map((card, index) => (
+                    <div
+                      key={`content-${index}`}
+                      ref={(el) => {
+                        if (el) {
+                          desktopContentRef.current[index] =
+                            el;
+                        }
+                      }}
+                      className="
+                        absolute
+                        inset-0
+                        flex
+                        flex-col
+                        justify-center
+                      "
+                    >
+
+                      <div className="mb-5 flex items-center gap-3">
+                        <span
+                          className="
+                            font-display
+                            text-sm
+                            font-bold
+                            italic
+                            text-orange
+                          "
+                        >
+                          {card.number}
+                        </span>
+
+                        <div className="h-px w-12 bg-orange/40" />
+
+                        <span
+                          className="
+                            text-[10px]
+                            font-semibold
+                            uppercase
+                            tracking-[0.28em]
+                            text-white/35
+                          "
+                        >
+                          {card.eyebrow}
+                        </span>
+                      </div>
+
+                      <h3
+                        className="
+                          font-display
+                          text-5xl
+                          font-bold
+                          italic
+                          leading-[0.88]
+                          text-white
+                          xl:text-6xl
+                        "
+                      >
+                        {card.title}
+                        <br />
+
+                        <span className="text-orange">
+                          {card.highlight}
+                        </span>
+                      </h3>
+
+                      <p
+                        className="
+                          mt-7
+                          max-w-md
+                          text-base
+                          leading-relaxed
+                          text-white/50
+                        "
+                      >
+                        {card.description}
+                      </p>
+
+                      {/* Indicador visual */}
+                      <div className="mt-9 flex items-center gap-4">
+                        <div
+                          className="
+                            h-1
+                            w-14
+                            overflow-hidden
+                            rounded-full
+                            bg-orange
+                          "
+                        />
+
+                        <span
+                          className="
+                            text-[10px]
+                            font-semibold
+                            uppercase
+                            tracking-[0.25em]
+                            text-white/25
+                          "
+                        >
+                          Box Curumim Gym
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* =============================================
+                    IMAGEM
+                ============================================= */}
+
+                <div
+                  className="
+                    relative
+                    h-[min(68vh,650px)]
+                    min-h-[500px]
+                  "
+                >
+                  {/* Moldura */}
+                  <div
+                    className="
+                      absolute
+                      -bottom-3
+                      -left-3
+                      h-full
+                      w-full
+                      rounded-[20px]
+                      border
+                      border-orange/20
+                    "
+                  />
+
+                  {/* Imagens */}
+                  <div
+                    className="
+                      relative
+                      h-full
+                      w-full
+                      overflow-hidden
+                      rounded-[20px]
+                      bg-black
+                    "
+                  >
+                    {CARDS.map((card, index) => (
+                      <div
+                        key={`desktop-image-${index}`}
+                        ref={(el) => {
+                          if (el) {
+                            desktopCardsRef.current[index] =
+                              el;
+                          }
+                        }}
+                        className="
+                          absolute
+                          inset-0
+                          overflow-hidden
+                        "
+                      >
+                        <Image
+                          src={card.src}
+                          alt={card.alt}
+                          fill
+                          className="
+                            object-cover
+                          "
+                          sizes="(min-width: 1024px) 60vw"
+                        />
+
+                        {/* Overlay */}
+                        <div
+                          className="
+                            absolute
+                            inset-0
+                            bg-gradient-to-t
+                            from-black/80
+                            via-black/10
+                            to-black/10
+                          "
+                        />
+
+                        {/* Número gigante */}
+                        <span
+                          className="
+                            absolute
+                            right-8
+                            top-6
+                            font-display
+                            text-[110px]
+                            font-bold
+                            italic
+                            leading-none
+                            text-white/[0.08]
+                            xl:text-[140px]
+                          "
+                        >
+                          {card.number}
+                        </span>
+
+                        {/* Caption */}
+                        <div
+                          className="
+                            absolute
+                            bottom-7
+                            left-8
+                            right-8
+                            flex
+                            items-end
+                            justify-between
+                          "
+                        >
+                          <div>
+                            <div
+                              className="
+                                mb-2
+                                h-[2px]
+                                w-8
+                                bg-orange
+                              "
+                            />
+
+                            <p
+                              className="
+                                font-display
+                                text-xl
+                                font-bold
+                                italic
+                                text-white
+                              "
+                            >
+                              {card.alt}
+                            </p>
+                          </div>
+
+                          <span
+                            className="
+                              hidden
+                              text-[9px]
+                              font-semibold
+                              uppercase
+                              tracking-[0.25em]
+                              text-white/40
+                              xl:block
+                            "
+                          >
+                            Box Curumim
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* =================================================
+                  RODAPÉ / PROGRESSO
+              ================================================= */}
+
+              <div className="pb-2">
+
+                <div
+                  className="
+                    mb-4
+                    flex
+                    items-center
+                    justify-between
+                  "
+                >
+                  <span
+                    className="
+                      text-[9px]
+                      font-semibold
+                      uppercase
+                      tracking-[0.3em]
+                      text-white/25
+                    "
+                  >
+                    Nossa estrutura
+                  </span>
+
+                  <span
+                    className="
+                      text-[9px]
+                      font-semibold
+                      uppercase
+                      tracking-[0.3em]
+                      text-white/25
+                    "
+                  >
+                    Role para explorar
+                  </span>
+                </div>
+
+                <div className="relative h-px w-full bg-white/10">
+
+                  <div
+                    ref={progressRef}
+                    className="
+                      absolute
+                      left-0
+                      top-0
+                      h-px
+                      w-full
+                      bg-orange
+                      will-change-transform
+                    "
+                  />
+                </div>
+
+                <div className="mt-3 flex justify-between">
+                  {CARDS.map((card, index) => (
+                    <span
+                      key={`progress-${index}`}
+                      className={`
+                        font-display
+                        text-xs
+                        font-bold
+                        italic
+                        transition-colors
+                        duration-300
+                        ${
+                          activeIndex === index
+                            ? "text-orange"
+                            : "text-white/20"
+                        }
+                      `}
+                    >
+                      {card.number}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* =====================================================
+          MOBILE / TABLET
+      ===================================================== */}
+
+      <div className="lg:hidden">
+
+        <div className="mx-auto max-w-3xl px-6 py-24 md:px-10 md:py-32">
+
+          {/* Header */}
+
+          <div className="mb-14">
+
+            <div className="mb-4 flex items-center gap-3">
+              <span className="h-[2px] w-7 bg-orange" />
+
+              <p
+                className="
+                  text-[10px]
+                  font-semibold
+                  uppercase
+                  tracking-[0.3em]
+                  text-white/45
+                "
+              >
+                Conheça nosso espaço
+              </p>
+            </div>
+
+            <h2
+              className="
+                font-display
+                text-5xl
+                font-bold
+                italic
+                leading-[0.9]
+                text-white
+                md:text-6xl
+              "
+            >
+              ESTRUTURA{" "}
+              <span className="text-orange">
+                COMPLETA
+              </span>
+            </h2>
+
+            <p
+              className="
+                mt-6
+                max-w-xl
+                text-sm
+                leading-relaxed
+                text-white/45
+                md:text-base
+              "
+            >
+              Um ambiente pensado para performance,
+              segurança e conforto. Conheça os espaços
+              que fazem parte da experiência Box Curumim.
+            </p>
+          </div>
+
+          {/* Cards */}
+
+          <div className="flex flex-col gap-12">
+
+            {CARDS.map((card, index) => (
+              <div
+                key={`mobile-${index}`}
+                ref={(el) => {
+                  if (el) {
+                    mobileCardsRef.current[index] = el;
+                  }
+                }}
+                className="
+                  relative
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-white/[0.08]
+                  bg-black
+                "
+              >
+
+                {/* Imagem */}
+
+                <div className="relative aspect-[4/5]">
+
+                  <Image
+                    src={card.src}
+                    alt={card.alt}
+                    fill
+                    className="object-cover"
+                    sizes="100vw"
+                  />
+
+                  <div
+                    className="
+                      absolute
+                      inset-0
+                      bg-gradient-to-t
+                      from-black
+                      via-black/20
+                      to-transparent
+                    "
+                  />
+
+                  {/* Número */}
+
+                  <span
+                    className="
+                      absolute
+                      right-5
+                      top-4
+                      font-display
+                      text-7xl
+                      font-bold
+                      italic
+                      leading-none
+                      text-white/[0.08]
+                    "
+                  >
+                    {card.number}
+                  </span>
+
+                  {/* Conteúdo */}
+
+                  <div
+                    className="
+                      absolute
+                      bottom-6
+                      left-6
+                      right-6
+                    "
+                  >
+                    <span
+                      className="
+                        text-[9px]
+                        font-semibold
+                        uppercase
+                        tracking-[0.28em]
+                        text-orange
+                      "
+                    >
+                      {card.eyebrow}
+                    </span>
+
+                    <h3
+                      className="
+                        mt-2
+                        font-display
+                        text-3xl
+                        font-bold
+                        italic
+                        leading-none
+                        text-white
+                      "
+                    >
+                      {card.title}
+                      <br />
+                      <span className="text-orange">
+                        {card.highlight}
+                      </span>
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Descrição */}
+
+                <div className="p-6">
+
+                  <div className="mb-4 flex items-center gap-3">
+                    <span
+                      className="
+                        font-display
+                        text-sm
+                        font-bold
+                        italic
+                        text-orange
+                      "
+                    >
+                      {card.number}
+                    </span>
+
+                    <div className="h-px flex-1 bg-white/10" />
+                  </div>
+
+                  <p
+                    className="
+                      text-sm
+                      leading-relaxed
+                      text-white/45
+                    "
+                  >
+                    {card.description}
+                  </p>
+
+                  <p
+                    className="
+                      mt-5
+                      text-[9px]
+                      font-semibold
+                      uppercase
+                      tracking-[0.25em]
+                      text-white/20
+                    "
+                  >
+                    {card.alt}
+                  </p>
+                </div>
+              </div>
+            ))}
+
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
