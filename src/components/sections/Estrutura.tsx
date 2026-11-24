@@ -18,7 +18,7 @@ const ANIMATION_CONFIG = {
 const CARDS = [
   {
     number: "01",
-    src: "/assets/Fachada.png",
+    src: "/assets/Fachada.webp",
     alt: "Fachada do Box Curumim Gym",
     eyebrow: "NOSSO ESPAÇO",
     title: "UM ESPAÇO QUE",
@@ -28,7 +28,7 @@ const CARDS = [
   },
   {
     number: "02",
-    src: "/assets/bannerHome.png",
+    src: "/assets/foto-2.webp",
     alt: "Ambiente interno de treinamento",
     eyebrow: "ÁREA DE TREINAMENTO",
     title: "ESTRUTURA PARA",
@@ -38,7 +38,7 @@ const CARDS = [
   },
   {
     number: "03",
-    src: "/assets/SecondaryBanner.png",
+    src: "/assets/foto-4.webp",
     alt: "Espaço dedicado ao movimento",
     eyebrow: "MOVIMENTO",
     title: "TREINO COM",
@@ -48,7 +48,7 @@ const CARDS = [
   },
   {
     number: "04",
-    src: "/assets/Fachada.png",
+    src: "/assets/Fachada.webp",
     alt: "Estrutura completa e equipada",
     eyebrow: "BOX CURUMIM",
     title: "TUDO NO MESMO",

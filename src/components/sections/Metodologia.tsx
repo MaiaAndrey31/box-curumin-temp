@@ -183,13 +183,13 @@ export function Metodologia() {
                 "
               >
                 <Image
-                  src="/assets/SecondaryBanner.png"
+                  src="/assets/cross.webp"
                   alt="Professor acompanhando aluno durante treino"
                   fill
                   className="
                     object-cover
                     brightness-[0.58]
-                    saturate-[0.9]
+                    saturate-[0.9] object-center
                   "
                   sizes="(max-width: 1024px) 100vw, 55vw"
                 />
@@ -254,23 +254,7 @@ export function Metodologia() {
                 </p>
               </div>
 
-              {/* Número decorativo */}
-              <span
-                className="
-                  absolute
-                  right-7 top-7
-                  font-display
-                  text-7xl
-                  font-bold
-                  italic
-                  leading-none
-                  text-white/[0.08]
-                  md:right-8 md:top-8
-                  md:text-8xl
-                "
-              >
-                01
-              </span>
+            
             </div>
           </div>
 

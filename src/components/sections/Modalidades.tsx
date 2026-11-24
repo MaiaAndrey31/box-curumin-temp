@@ -14,7 +14,7 @@ const MODALIDADES = [
     id: "musculacao",
     title: "MUSCULAÇÃO",
     desc: "Força, saúde e qualidade de vida.",
-    image: "/assets/bannerHome.png",
+    image: "/assets/foto-3.webp",
     icon: (
       <svg
         width="30"
@@ -34,7 +34,7 @@ const MODALIDADES = [
     id: "mmt",
     title: "MMT",
     desc: "Mixed Modalities Training. Condicionamento, força e resistência.",
-    image: "/assets/SecondaryBanner.png",
+    image: "/assets/foto-1.webp",
     icon: (
       <svg
         width="30"
@@ -54,7 +54,7 @@ const MODALIDADES = [
     id: "parkour",
     title: "PARKOUR",
     desc: "Movimento, coordenação e confiança para as crianças.",
-    image: "/assets/Fachada.png",
+    image: "/assets/foto-5.webp",
     icon: (
       <svg
         width="30"
