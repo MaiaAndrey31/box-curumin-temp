@@ -214,7 +214,9 @@ export function Header() {
 
           {/* CTA desktop */}
           <a
-            href="#contato"
+            href="https://api.whatsapp.com/send/?phone=5518996190777"
+            target="_blank"
+            rel="noopener noreferrer"
             className="hidden xl:inline-flex items-center gap-2 justify-self-end px-5 py-2.5 rounded-full border border-orange bg-transparent text-orange font-display text-xs font-bold italic uppercase tracking-wide transition-all duration-300 hover:bg-orange hover:text-black hover:shadow-[0_0_24px_rgba(243,107,33,0.45)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange"
           >
             <CalendarIcon />
@@ -305,7 +307,9 @@ export function Header() {
             }`}
           >
             <a
-              href="#contato"
+              href="https://api.whatsapp.com/send/?phone=5518996190777"
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={closeMenu}
               className="w-full inline-flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-orange text-black font-display text-base font-bold italic uppercase tracking-wide transition-all duration-300 hover:bg-orange-hover active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange"
             >

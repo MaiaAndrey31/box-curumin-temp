@@ -263,7 +263,9 @@ export function Contato() {
                 size="lg"
                 icon={<WhatsAppIcon />}
                 onClick={() =>
-                  window.open("https://wa.me/", "_blank")
+                  window.open("https://api.whatsapp.com/send/?phone=5518996190777",
+                "_blank",
+                "noopener,noreferrer")
                 }
               >
                 Fale pelo WhatsApp
@@ -506,27 +508,39 @@ export function Contato() {
             </p>
           </div>
 
-          <a
-            href="https://freelings.com.br"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-              font-body
-              text-xs
-              text-white/45
-              transition-colors
-              duration-300
-              hover:text-[#F36B21]
-              focus-visible:outline-2
-              focus-visible:outline-offset-4
-              focus-visible:outline-[#F36B21]
-            "
-          >
-            Desenvolvido por{" "}
-            <span className="font-semibold text-white/65 transition-colors duration-300 hover:text-[#F36B21]">
-              Freelings Company
-            </span>
-          </a>
+
+          <div className="flex flex-col items-start gap-1.5 border-l-2 border-[#F36B21]/50 pl-3 text-left">
+              <a
+                href="https://freelings.com.br"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  group
+                  font-body
+                  text-xs
+                  leading-none
+                  text-white/45
+                  transition-colors
+                  duration-300
+                  hover:text-white/70
+                  focus-visible:outline-2
+                  focus-visible:outline-offset-4
+                  focus-visible:outline-[#F36B21]
+                "
+              >
+                Desenvolvido por{" "}
+                <span className="font-semibold text-white/65 transition-colors duration-300 group-hover:text-[#F36B21]">
+                  Freelings Company
+                </span>
+              </a>
+
+              <span className="font-body text-xs leading-none text-white/45">
+                Provérbios{" "}
+                <span className="font-bold text-[#F36B21]">16:3</span>
+              </span>
+          </div>
+                  
+         
       </footer>
       </div>
     </section>

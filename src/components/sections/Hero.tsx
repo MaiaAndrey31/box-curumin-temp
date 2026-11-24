@@ -379,19 +379,22 @@ export function Hero() {
                     </p>
 
                     {/* CTAs */}
-                    <div
-                        ref={ctaRef}
-                        className="flex flex-wrap items-center gap-3 md:gap-5 mt-3 md:mt-5 opacity-0"
-                    >
-                        {/* CTA principal */}
-                        <div className="relative group">
+                   {/* CTA principal */}
+                        <div className="relative group w-fit">
                             {/* Glow: o raio precisa acompanhar o do botão */}
-                            <div className="absolute -inset-1 rounded-2xl bg-orange/30 blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+                            <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-orange/30 blur-lg opacity-50 transition-all duration-500 group-hover:opacity-100 group-hover:-inset-1.5" />
 
                             <Button
                                 size="md"
                                 icon={<CalendarIcon />}
-                                className="rounded-2xl mb-1"
+                                className="relative z-10 rounded-2xl mb-1 cursor-pointer transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]"
+                                onClick={() =>
+                                    window.open(
+                                        "https://api.whatsapp.com/send/?phone=5518996190777",
+                                        "_blank",
+                                        "noopener,noreferrer"
+                                    )
+                                }
                             >
                                 Agende sua Experiência
 
@@ -405,7 +408,7 @@ export function Hero() {
                                     strokeWidth="2"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    className="ml-4 shrink-0 text-white/40 transition-all duration-300 group-hover:text-white/80 group-hover:translate-x-1"
+                                    className="ml-4 shrink-0 text-white/60 transition-all duration-300 group-hover:text-white group-hover:translate-x-1"
                                     aria-hidden="true"
                                 >
                                     <path d="M9 6l6 6-6 6" />
@@ -469,7 +472,7 @@ export function Hero() {
                             </span>
                         </a>
                     </div>
-                </div>
+                
 
                 {/* ======================================
             COLUNA DIREITA — MODALIDADES
