@@ -299,13 +299,17 @@ export function Hero() {
                     sizes="100vw"
                 />
 
-                {/* Overlay cinematográfico */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-black/10" />
+                {/* Overlay cinematográfico — mais claro no mobile, padrão no desktop */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 md:from-black via-black/20 md:via-black/35 to-transparent" />
 
-                <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/15 to-black/55" />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/60 md:from-black/85 via-black/10 md:via-black/15 to-black/30 md:to-black/55" />
 
                 {/* Escurecimento inferior */}
-                <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/70" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 md:from-black/30 via-transparent to-black/50 md:to-black/70" />
+
+                {/* Mobile: escurece fortemente o topo para legibilidade do título laranja + toque sutil de laranja embaixo */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/90 via-black/60 to-transparent md:hidden" />
+                <div className="absolute inset-0 bg-gradient-to-t from-orange/[0.06] via-transparent to-transparent md:hidden" />
             </div>
 
             {/* ======================================
@@ -326,27 +330,27 @@ export function Hero() {
           CONTEÚDO PRINCIPAL
       ====================================== */}
 
-            <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-20 pt-32 pb-24 lg:pt-36 lg:pb-20 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="relative z-10 container mx-auto px-6 md:px-12 lg:px-20 pt-20 pb-16 md:pt-32 md:pb-24 lg:pt-36 lg:pb-20 grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
                 {/* COLUNA ESQUERDA */}
-                <div className="lg:col-span-8 flex flex-col items-start gap-6">
+                <div className="lg:col-span-8 flex flex-col items-start gap-4 md:gap-6">
 
                     {/* Identificação */}
                     <div
                         ref={subtitleRef}
-                        className="flex items-center gap-5 opacity-0"
+                        className="flex items-center gap-3 md:gap-5 opacity-0"
                     >
-                        <p className="text-gray-light text-xs md:text-sm uppercase tracking-[0.3em] font-medium">
+                        <p className="text-gray-light text-[10px] md:text-sm uppercase tracking-[0.3em] font-medium">
                             Box Curumim Gym
                         </p>
 
-                        <span className="w-12 h-[2px] bg-orange" />
+                        <span className="w-8 md:w-12 h-[2px] bg-orange" />
                     </div>
 
                     {/* Headline */}
                     <h1
                         ref={titleRef}
-                        className="font-display text-[clamp(3rem,7.2vw,7.5rem)] font-bold italic leading-[0.86] tracking-[-0.045em] max-w-5xl"
+                        className="font-display text-[clamp(2.4rem,10vw,3.2rem)] md:text-[clamp(3rem,7.2vw,7.5rem)] font-bold italic leading-[0.88] tracking-[-0.04em] max-w-5xl"
                     >
                         <span className="word inline-block text-white mr-3">
                             MOVIMENTO
@@ -364,20 +368,20 @@ export function Hero() {
                     </h1>
 
                     {/* Palavras-chave */}
-                    <p className="text-white/75 text-xs sm:text-sm md:text-base uppercase tracking-[0.16em] md:tracking-[0.22em] font-medium">
+                    <p className="text-white/75 text-[10px] sm:text-sm md:text-base uppercase tracking-[0.14em] md:tracking-[0.22em] font-medium">
                         Saúde
-                        <span className="text-orange mx-2">•</span>
+                        <span className="text-orange mx-1.5 md:mx-2">•</span>
                         Performance
-                        <span className="text-orange mx-2">•</span>
+                        <span className="text-orange mx-1.5 md:mx-2">•</span>
                         Disciplina
-                        <span className="text-orange mx-2">•</span>
+                        <span className="text-orange mx-1.5 md:mx-2">•</span>
                         Evolução
                     </p>
 
                     {/* CTAs */}
                     <div
                         ref={ctaRef}
-                        className="flex flex-wrap items-center gap-5 mt-5 opacity-0"
+                        className="flex flex-wrap items-center gap-3 md:gap-5 mt-3 md:mt-5 opacity-0"
                     >
                         {/* CTA principal */}
                         <div className="relative group">
@@ -409,17 +413,17 @@ export function Hero() {
                             </Button>
                         </div>
 
-                        {/* CTA secundário */}
+                        {/* CTA secundário — compacto no mobile */}
                         <a
                             href="#estrutura"
-                            className="group flex items-center gap-4 text-white transition-all duration-300
+                            className="group flex items-center gap-3 md:gap-4 text-white transition-all duration-300
                active:scale-95
                focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange"
                             aria-label="Conheça nossa estrutura"
                         >
-                            {/* Círculo do play */}
+                            {/* Círculo do play — menor no mobile */}
                             <span
-                                className="relative w-16 h-16 rounded-full border-2 border-white/80 bg-white/5 backdrop-blur-sm
+                                className="relative w-11 h-11 md:w-16 md:h-16 rounded-full border-2 border-white/80 bg-white/5 backdrop-blur-sm
                    flex items-center justify-center shrink-0
                    transition-all duration-300
                    group-hover:border-orange group-hover:bg-orange group-hover:scale-110
@@ -433,20 +437,30 @@ export function Hero() {
                                 />
 
                                 <svg
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="md:hidden relative ml-0.5 shrink-0 text-white transition-transform duration-300 group-hover:scale-110"
+                                    aria-hidden="true"
+                                >
+                                    <path d="M6 4l14 8-14 8V4z" />
+                                </svg>
+                                <svg
                                     width="22"
                                     height="22"
                                     viewBox="0 0 24 24"
                                     fill="currentColor"
-                                    className="relative ml-0.5 shrink-0 text-white transition-transform duration-300 group-hover:scale-110"
+                                    className="hidden md:block relative ml-0.5 shrink-0 text-white transition-transform duration-300 group-hover:scale-110"
                                     aria-hidden="true"
                                 >
                                     <path d="M6 4l14 8-14 8V4z" />
                                 </svg>
                             </span>
 
-                            {/* Texto */}
+                            {/* Texto — menor no mobile */}
                             <span
-                                className="font-display uppercase italic font-bold text-base tracking-wide leading-tight text-left
+                                className="font-display uppercase italic font-bold text-sm md:text-base tracking-wide leading-tight text-left
                    transition-colors duration-300 group-hover:text-amber-500"
                             >
                                 Conheça
@@ -461,11 +475,11 @@ export function Hero() {
             COLUNA DIREITA — MODALIDADES
         ====================================== */}
 
-                <div className="lg:col-span-4 w-full mt-4 lg:mt-0">
+                <div className="lg:col-span-4 w-full mt-2 lg:mt-0">
 
                     <div
                         ref={cardsRef}
-                        className="flex flex-col gap-3 max-w-md lg:ml-auto"
+                        className="flex flex-col gap-2 md:gap-3 max-w-md lg:ml-auto"
                     >
                         {modalities.map((item, index) => {
                             const Icon = item.icon;
@@ -473,23 +487,23 @@ export function Hero() {
                             return (
                                 <div
                                     key={item.title}
-                                    className="group relative flex items-center gap-5 p-4 md:p-5 rounded-2xl border border-white/[0.07] bg-black/55 backdrop-blur-md transition-all duration-400 hover:border-orange/50 hover:bg-black/80 hover:-translate-x-2 hover:shadow-[0_0_30px_rgba(243,107,33,0.10)]"
+                                    className="group relative flex items-center gap-3 md:gap-5 p-3 md:p-5 rounded-xl md:rounded-2xl border border-white/[0.07] bg-black/55 backdrop-blur-md transition-all duration-400 hover:border-orange/50 hover:bg-black/80 hover:-translate-x-2 hover:shadow-[0_0_30px_rgba(243,107,33,0.10)]"
                                 >
                                     {/* Destaque lateral no hover */}
                                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-0 rounded-full bg-orange shadow-[0_0_15px_rgba(243,107,33,0.8)] transition-all duration-300 group-hover:h-3/4" />
 
                                     {/* Ícone */}
-                                    <div className="w-16 h-16 rounded-full border border-orange/50 flex items-center justify-center text-orange shrink-0 transition-all duration-300 group-hover:bg-orange/10 group-hover:border-orange group-hover:shadow-[0_0_20px_rgba(243,107,33,0.15)]">
+                                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full border border-orange/50 flex items-center justify-center text-orange shrink-0 transition-all duration-300 group-hover:bg-orange/10 group-hover:border-orange group-hover:shadow-[0_0_20px_rgba(243,107,33,0.15)]">
                                         <Icon />
                                     </div>
 
                                     {/* Informações */}
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-display font-bold italic uppercase text-white text-lg md:text-xl">
+                                        <p className="font-display font-bold italic uppercase text-white text-base md:text-xl">
                                             {item.title}
                                         </p>
 
-                                        <p className="text-gray-light text-sm leading-snug mt-1">
+                                        <p className="text-gray-light text-xs md:text-sm leading-snug mt-0.5 md:mt-1">
                                             {item.desc}
                                         </p>
                                     </div>

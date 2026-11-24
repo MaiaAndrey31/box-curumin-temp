@@ -38,14 +38,24 @@ export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeId, setActiveId] = useState("hero");
+  const [isMobile, setIsMobile] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
-  // Animação de entrada
+  // Detecta viewport mobile para controlar visibilidade do header
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // Animação de entrada — apenas no desktop; no mobile o header começa invisível
   useGSAP(
     () => {
       const mm = gsap.matchMedia();
 
-      mm.add("(prefers-reduced-motion: no-preference)", () => {
+      mm.add("(min-width: 768px)", () => {
         gsap.fromTo(
           headerRef.current,
           { y: -100, opacity: 0 },
@@ -55,7 +65,7 @@ export function Header() {
             duration: 0.8,
             ease: "power3.out",
             delay: 0.2,
-            clearProps: "transform", // não deixa transform residual no header
+            clearProps: "transform",
           }
         );
       });
@@ -65,7 +75,7 @@ export function Header() {
     { scope: headerRef }
   );
 
-  // Estado de scroll (fundo mais sólido + header mais compacto)
+  // Estado de scroll (fundo mais sólido + header mais compacto + visibilidade mobile)
   useEffect(() => {
     const onScroll = () => {
       setIsScrolled(window.scrollY > 24);
@@ -76,6 +86,9 @@ export function Header() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // No mobile, header começa invisível e só aparece após scroll
+  const isHeaderVisible = !isMobile || isScrolled || isMenuOpen;
 
   // Link ativo conforme a seção visível
   useEffect(() => {
@@ -133,6 +146,8 @@ export function Header() {
       <header
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
+          !isHeaderVisible ? "-translate-y-full opacity-0 pointer-events-none" : ""
+        } ${
           isMenuOpen
             ? "bg-transparent border-transparent"
             : isScrolled
