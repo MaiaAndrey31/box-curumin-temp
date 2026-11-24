@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, type RefObject } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -42,6 +42,9 @@ const PANEIS = [
     mobileImage: "/assets/manifesto-mobile3.webp",
   },
 ] as const;
+
+// Altura do header fixo
+const HEADER_H = 64;
 
 // ============================================
 // HELPER: renderiza texto com palavras destacadas em laranja.
@@ -103,6 +106,88 @@ function ManifestoText({
 }
 
 // ============================================
+// INDICADOR DE PROGRESSO (usado no desktop e no mobile)
+// ============================================
+function atualizarProgresso(
+  progress: number,
+  counter: HTMLSpanElement | null,
+  segs: (HTMLSpanElement | null)[],
+  state: { index: number }
+) {
+  const total = PANEIS.length;
+  const value = progress * (total - 1);
+
+  // Cada segmento enche conforme o scroll chega no painel correspondente
+  segs.forEach((seg, i) => {
+    if (!seg) return;
+    const fill = Math.min(1, Math.max(0, value - i + 1));
+    gsap.set(seg, { scaleX: fill });
+  });
+
+  // Número atual troca com uma pequena animação
+  const active = Math.round(value);
+
+  if (active !== state.index && counter) {
+    state.index = active;
+    counter.textContent = String(active + 1).padStart(2, "0");
+    gsap.fromTo(
+      counter,
+      { y: 8, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.35, ease: "power2.out" }
+    );
+  }
+}
+
+function Progresso({
+  counterRef,
+  segsRef,
+}: {
+  counterRef: RefObject<HTMLSpanElement | null>;
+  segsRef: { current: (HTMLSpanElement | null)[] };
+}) {
+  return (
+    <div
+      className="
+        absolute z-20 flex items-center gap-4
+        left-6 right-6 bottom-7
+        md:right-auto md:left-16 lg:left-24
+        md:bottom-10 lg:bottom-12
+        md:w-[26rem]
+      "
+      aria-hidden="true"
+    >
+      <span
+        ref={counterRef}
+        className="w-9 md:w-11 font-display text-2xl md:text-3xl font-bold italic leading-none tabular-nums text-[#F36B21] drop-shadow-[0_0_10px_rgba(243,107,33,0.6)]"
+      >
+        01
+      </span>
+
+      <div className="flex flex-1 items-center gap-1.5">
+        {PANEIS.map((painel, i) => (
+          <div
+            key={painel.id}
+            className="relative h-[3px] flex-1 overflow-hidden rounded-full bg-white/15"
+          >
+            <span
+              ref={(el) => {
+                segsRef.current[i] = el;
+              }}
+              className="absolute inset-0 origin-left rounded-full bg-[#F36B21]"
+              style={{ transform: `scaleX(${i === 0 ? 1 : 0})` }}
+            />
+          </div>
+        ))}
+      </div>
+
+      <span className="font-display text-base md:text-lg font-bold italic leading-none tabular-nums text-white/35">
+        {String(PANEIS.length).padStart(2, "0")}
+      </span>
+    </div>
+  );
+}
+
+// ============================================
 // COMPONENTE PRINCIPAL
 // ============================================
 export function Manifesto() {
@@ -111,8 +196,12 @@ export function Manifesto() {
   const mobileSectionRef = useRef<HTMLElement>(null);
   const desktopPanelsRef = useRef<(HTMLElement | null)[]>([]);
   const mobilePanelsRef = useRef<(HTMLElement | null)[]>([]);
-  const desktopDotsRef = useRef<(HTMLSpanElement | null)[]>([]);
-  const desktopProgressRef = useRef<HTMLSpanElement>(null);
+
+  // Refs do indicador de progresso (precisam ficar DENTRO do componente)
+  const desktopCounterRef = useRef<HTMLSpanElement>(null);
+  const desktopSegsRef = useRef<(HTMLSpanElement | null)[]>([]);
+  const mobileCounterRef = useRef<HTMLSpanElement>(null);
+  const mobileSegsRef = useRef<(HTMLSpanElement | null)[]>([]);
 
   // ============================================
   // DESKTOP ANIMATION
@@ -152,7 +241,7 @@ export function Manifesto() {
               ease: "power3.out",
               scrollTrigger: {
                 trigger: desktopSectionRef.current,
-                start: "top 80%",
+                start: "top 100%",
                 toggleActions: "play none none reverse",
               },
             }
@@ -162,38 +251,32 @@ export function Manifesto() {
         // Timeline principal com scrub cinematográfico
         // AJUSTE: multiplicador da distância de scroll entre slides (atual: 3.0)
         // Aumente para mais lento/longo, diminua para mais rápido
-        const SCROLL_DISTANCE_MULTIPLIER = 3.0;
+        const SCROLL_DISTANCE_MULTIPLIER = 2.0;
 
         // AJUSTE: suavidade do scrub em segundos (atual: 2.0)
         // Maior = mais suave/lento, menor = mais direto/rápido
-        const SCRUB_SMOOTHNESS = 2.0;
+        const SCRUB_SMOOTHNESS = 1.0;
+
+        const progressState = { index: 0 };
 
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: desktopSectionRef.current,
-            start: "top top",
-            end: () => `+=${window.innerHeight * SCROLL_DISTANCE_MULTIPLIER * (total - 1)}`,
+            start: `top top+=${HEADER_H}`,
+            end: () =>
+              `+=${window.innerHeight * SCROLL_DISTANCE_MULTIPLIER * (total - 1)}`,
             pin: true,
             scrub: SCRUB_SMOOTHNESS,
             invalidateOnRefresh: true,
+            anticipatePin: 1,
 
-            onUpdate: (self) => {
-              const rawIndex = self.progress * (total - 1);
-              const activeIndex = Math.round(rawIndex);
-
-              desktopDotsRef.current.forEach((dot, i) => {
-                if (dot) {
-                  dot.dataset.active =
-                    i === activeIndex ? "true" : "false";
-                }
-              });
-
-              if (desktopProgressRef.current) {
-                gsap.set(desktopProgressRef.current, {
-                  scaleX: self.progress,
-                });
-              }
-            },
+            onUpdate: (self) =>
+              atualizarProgresso(
+                self.progress,
+                desktopCounterRef.current,
+                desktopSegsRef.current,
+                progressState
+              ),
           },
         });
 
@@ -331,14 +414,26 @@ export function Manifesto() {
         // AJUSTE MOBILE: suavidade do scrub em segundos (atual: 1.5)
         const MOBILE_SCRUB_SMOOTHNESS = 1.5;
 
+        const progressState = { index: 0 };
+
         const mobileTl = gsap.timeline({
           scrollTrigger: {
             trigger: mobileSectionRef.current,
-            start: "top top",
-            end: () => `+=${window.innerHeight * MOBILE_SCROLL_MULTIPLIER * (total - 1)}`,
+            start: `top top`,
+            end: () =>
+              `+=${window.innerHeight * MOBILE_SCROLL_MULTIPLIER * (total - 1)}`,
             pin: true,
             scrub: MOBILE_SCRUB_SMOOTHNESS,
             invalidateOnRefresh: true,
+            anticipatePin: 1,
+
+            onUpdate: (self) =>
+              atualizarProgresso(
+                self.progress,
+                mobileCounterRef.current,
+                mobileSegsRef.current,
+                progressState
+              ),
           },
         });
 
@@ -418,7 +513,7 @@ export function Manifesto() {
         ref={desktopSectionRef}
         id="manifesto"
         className="relative w-full bg-black overflow-hidden max-md:hidden"
-        style={{ height: "100vh" }}
+        style={{ height: `calc(100svh - ${HEADER_H}px)` }}
         aria-label="Manifesto Box Curumim Gym"
       >
         {/* PAINÉIS SOBREPOSTOS */}
@@ -456,7 +551,7 @@ export function Manifesto() {
               />
 
               {/* CONTEÚDO - posicionado na área negativa esquerda */}
-              {/* AJUSTE: max-w do container de conteúdo (atual: 56rem). Aumente para linhas mais longas */}
+              {/* AJUSTE: max-w do container de conteúdo (atual: 60rem). Aumente para linhas mais longas */}
               <div
                 className="
                   relative z-10
@@ -479,7 +574,6 @@ export function Manifesto() {
                 </div>
 
                 {/* Headline */}
-                {/* AJUSTE: leading da headline (atual: 1.0). Aumente para mais espaço entre linhas */}
                 <ManifestoText
                   texto={painel.headline}
                   highlights={painel.headlineHighlights}
@@ -495,7 +589,6 @@ export function Manifesto() {
                 />
 
                 {/* Body */}
-                {/* AJUSTE: max-w do body (atual: 40rem) e leading (atual: 1.7). Aumente para menos quebras e mais respiro */}
                 <p
                   className="
                     font-body
@@ -534,73 +627,18 @@ export function Manifesto() {
                   </p>
                 </div>
               </div>
-
-              {/* INDICADOR DO PAINEL */}
-              <div
-                className="
-                  absolute bottom-10 left-16
-                  lg:bottom-12 lg:left-20
-                  flex items-center gap-3 z-10
-                "
-                aria-hidden="true"
-              >
-                <span className="font-display text-[#F36B21] text-lg font-bold italic">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="w-6 h-px bg-white/20" />
-                <span className="font-display text-white/25 text-lg font-bold italic">
-                  03
-                </span>
-              </div>
             </article>
           ))}
         </div>
 
-        {/* INDICADORES DE PROGRESSO */}
-        <div
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex gap-3"
-          role="list"
-          aria-label="Painéis do manifesto"
-        >
-          {PANEIS.map((painel, i) => (
-            <span
-              key={painel.id}
-              ref={(el) => {
-                desktopDotsRef.current[i] = el;
-              }}
-              data-active={i === 0 ? "true" : "false"}
-              className="
-                w-2 h-2 rounded-full border
-                transition-all duration-300
-                data-[active=true]:bg-[#F36B21]
-                data-[active=true]:border-[#F36B21]
-                data-[active=true]:shadow-[0_0_10px_rgba(243,107,33,0.6)]
-                data-[active=true]:scale-125
-                data-[active=false]:bg-transparent
-                data-[active=false]:border-white/30
-              "
-              role="listitem"
-              aria-label={`Painel ${painel.id}`}
-            />
-          ))}
-        </div>
-
-        {/* BARRA DE PROGRESSO */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-[2px] z-20 bg-white/[0.05]"
-          aria-hidden="true"
-        >
-          <span
-            ref={desktopProgressRef}
-            className="block h-full bg-[#F36B21] origin-left scale-x-0 shadow-[0_0_10px_rgba(243,107,33,0.5)]"
-          />
-        </div>
-
         {/* Gradiente de saída */}
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black to-transparent z-20"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black to-transparent z-10"
           aria-hidden="true"
         />
+
+        {/* PROGRESSO (desktop) */}
+        <Progresso counterRef={desktopCounterRef} segsRef={desktopSegsRef} />
       </section>
 
       {/* ============================================
@@ -610,7 +648,7 @@ export function Manifesto() {
       <section
         ref={mobileSectionRef}
         className="relative w-full bg-black overflow-hidden md:hidden"
-        style={{ height: "100vh" }}
+        style={{ height: `calc(100svh - ${HEADER_H}px)` }}
         aria-label="Manifesto Box Curumim Gym Mobile"
       >
         {/* PAINÉIS SOBREPOSTOS MOBILE */}
@@ -652,7 +690,6 @@ export function Manifesto() {
               />
 
               {/* CONTEÚDO - respeitando área escura superior da imagem mobile */}
-              {/* AJUSTE MOBILE: max-w do container (atual: 36rem). Aumente para linhas mais longas */}
               <div
                 className="
                   relative z-10
@@ -675,23 +712,21 @@ export function Manifesto() {
                 </div>
 
                 {/* Headline */}
-                {/* AJUSTE MOBILE: leading da headline (atual: 1.05). Aumente para mais espaço entre linhas */}
                 <ManifestoText
                   texto={painel.headline}
                   highlights={painel.headlineHighlights}
                   className="
                     font-display
-                    text-[clamp(2rem,9vw,3.2rem)]
+                    text-[clamp(2rem,8.5vw,3.6rem)]
                     font-bold
                     italic
-                    leading-[1.05]
+                    leading-[1.2]
                     tracking-[-0.02em]
                     mb-5
                   "
                 />
 
                 {/* Body */}
-                {/* AJUSTE MOBILE: max-w do body (atual: 34rem) e leading (atual: 1.7). Aumente para menos quebras e mais respiro */}
                 <p
                   className="
                     font-body
@@ -704,7 +739,7 @@ export function Manifesto() {
                     max-w-[34rem]
                   "
                 >
-                  {painel.body}
+                  {painel.body.replace(/\n/g, " ")}
                 </p>
 
                 {/* Accent */}
@@ -717,7 +752,7 @@ export function Manifesto() {
                   <p
                     className="
                       font-display
-                      text-[0.9rem]
+                      text-[1.2rem]
                       font-bold
                       italic
                       uppercase
@@ -730,58 +765,18 @@ export function Manifesto() {
                   </p>
                 </div>
               </div>
-
-              {/* INDICADOR DO PAINEL */}
-              <div
-                className="
-                  absolute bottom-8 left-6
-                  flex items-center gap-3 z-10
-                "
-                aria-hidden="true"
-              >
-                <span className="font-display text-[#F36B21] text-base font-bold italic">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span className="w-5 h-px bg-white/20" />
-                <span className="font-display text-white/25 text-base font-bold italic">
-                  03
-                </span>
-              </div>
             </article>
-          ))}
-        </div>
-
-        {/* INDICADORES MOBILE */}
-        <div
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-3"
-          role="list"
-          aria-label="Painéis do manifesto mobile"
-        >
-          {PANEIS.map((painel, i) => (
-            <span
-              key={painel.id}
-              data-active={i === 0 ? "true" : "false"}
-              className="
-                w-2 h-2 rounded-full border
-                transition-all duration-300
-                data-[active=true]:bg-[#F36B21]
-                data-[active=true]:border-[#F36B21]
-                data-[active=true]:shadow-[0_0_10px_rgba(243,107,33,0.6)]
-                data-[active=true]:scale-125
-                data-[active=false]:bg-transparent
-                data-[active=false]:border-white/30
-              "
-              role="listitem"
-              aria-label={`Painel ${painel.id}`}
-            />
           ))}
         </div>
 
         {/* Gradiente de saída */}
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black to-transparent z-20"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black to-transparent z-10"
           aria-hidden="true"
         />
+
+        {/* PROGRESSO (mobile) */}
+        <Progresso counterRef={mobileCounterRef} segsRef={mobileSegsRef} />
       </section>
     </>
   );

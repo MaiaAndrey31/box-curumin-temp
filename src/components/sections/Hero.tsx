@@ -389,9 +389,9 @@ export function Hero() {
                             <div className="absolute -inset-1 rounded-2xl bg-orange/30 blur-lg opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
 
                             <Button
-                                size="lg"
+                                size="md"
                                 icon={<CalendarIcon />}
-                                className="rounded-2xl"
+                                className="rounded-2xl mb-1"
                             >
                                 Agende sua Experiência
 
