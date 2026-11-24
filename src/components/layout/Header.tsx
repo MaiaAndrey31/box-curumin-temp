@@ -227,24 +227,24 @@ export function Header() {
           <button
             type="button"
             onClick={() => setIsMenuOpen((prev) => !prev)}
-            className="xl:hidden relative z-50 w-11 h-11 -mr-2 flex flex-col items-center justify-center gap-1.5 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange"
+            className="group xl:hidden relative z-50 w-11 h-11 -mr-2 flex flex-col items-center justify-center gap-1.5 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-orange"
             aria-label={isMenuOpen ? "Fechar menu" : "Abrir menu"}
             aria-expanded={isMenuOpen}
             aria-controls="mobile-menu"
           >
             <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-                isMenuOpen ? "rotate-45 translate-y-2 bg-orange" : ""
+              className={`block w-6 h-0.5 rounded-full bg-orange transition-all duration-300 ${
+                isMenuOpen ? "rotate-45 translate-y-2" : ""
               }`}
             />
             <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
+              className={`block w-6 h-0.5 rounded-full bg-orange transition-all duration-300 ${
                 isMenuOpen ? "opacity-0" : ""
               }`}
             />
             <span
-              className={`block w-6 h-0.5 bg-white transition-all duration-300 ${
-                isMenuOpen ? "-rotate-45 -translate-y-2 bg-orange" : ""
+              className={`block w-6 h-0.5 rounded-full bg-orange transition-all duration-300 ${
+                isMenuOpen ? "-rotate-45 -translate-y-2" : ""
               }`}
             />
           </button>
