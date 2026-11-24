@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -65,7 +65,10 @@ const INSTAGRAM_POSTS = [
 export function Comunidade() {
   const sectionRef = useRef<HTMLElement>(null);
   const cardsRef = useRef<HTMLDivElement[]>([]);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
+  // Animação de entrada dos depoimentos
   useGSAP(
     () => {
       const ctx = gsap.context(() => {
@@ -119,6 +122,30 @@ export function Comunidade() {
       return () => ctx.revert();
     },
     { scope: sectionRef }
+  );
+
+  // Carrossel infinito do Instagram
+  useGSAP(
+    () => {
+      if (!trackRef.current) return;
+
+      const track = trackRef.current;
+      // Largura de um conjunto de posts (6 cards + gaps)
+      const singleSetWidth = track.scrollWidth / 2;
+
+      const tween = gsap.to(track, {
+        x: -singleSetWidth,
+        duration: 25,
+        ease: "none",
+        repeat: -1,
+        paused: isPaused,
+      });
+
+      return () => {
+        tween.kill();
+      };
+    },
+    { dependencies: [isPaused], scope: sectionRef }
   );
 
   return (
@@ -343,7 +370,14 @@ export function Comunidade() {
          {/* CARROSSEL INSTAGRAM */}
             <div className="relative overflow-hidden">
 
-              <div className={`${styles.instagramTrack} flex w-max`}>
+              <div
+                ref={trackRef}
+                className={`${styles.instagramTrack} flex w-max`}
+                onMouseEnter={() => setIsPaused(true)}
+                onMouseLeave={() => setIsPaused(false)}
+                onTouchStart={() => setIsPaused(true)}
+                onTouchEnd={() => setIsPaused(false)}
+              >
                 {[...INSTAGRAM_POSTS, ...INSTAGRAM_POSTS].map((post, index) => (
                   <a
                     key={`${post.id}-${index}`}
@@ -354,7 +388,7 @@ export function Comunidade() {
                       group
                       relative
                       h-[400px]
-                      w-[200px]
+                      w-[250px]
                       shrink-0
                       mr-5
                       overflow-hidden
